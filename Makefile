@@ -9,7 +9,7 @@ all: otp.o md5.o Link
 
 
 Link:
-	$(CC) $(CCFLAGS) -o $(BPATH)$(BNAME).bin $(OPATH)*.o 
+	$(CC) $(CCFLAGS) -o $(BPATH)$(BNAME).bin $(OPATH)*.o
 	ln -f $(BPATH)$(BNAME).bin $(BNAME).bin
 
 md5.o:
@@ -20,3 +20,4 @@ otp.o:
 
 clean: 
 	rm -f $(OPATH)*.o $(BPATH)$(BNAME).bin $(BNAME).bin
+

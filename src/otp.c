@@ -6094,58 +6094,70 @@ string pad_check_phrase(const string phrase[], const unsigned int words, const u
     return string(padbuff, crypt_len);
 }
 
-void format_1(int hour, int minute, int second) {
-        words = 0;
-        phraselen = 0;
-        string word = num[hour]; phrase[words] = word; ++words; phraselen += word.length();
-        word = "O"; phrase[words] = word; ++words; phraselen += word.length();
-        word = "CLOCK"; phrase[words] = word; ++words; phraselen += word.length();
-        if(minute > 20 && (minute%10) != 0) {
-            word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
-            word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
-        } else {
-            word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
-        }
-        word = "MINUTES";
-        if(minute == 1)
-            word = "MINUTE";
-        phrase[words] = word; ++words; phraselen += word.length();
+void format_1(int hour, int max_hour) {
+    for(; hour < max_hour; hour++)
+        for(int minute = 0; minute <= 5; minute++)
+            for(int second = 0; second < 60; second++) {
+                if(minute == 5 and second >0)
+                    break;
+                words = 0;
+                phraselen = 0;
+                string word = num[hour]; phrase[words] = word; ++words; phraselen += word.length();
+                word = "O"; phrase[words] = word; ++words; phraselen += word.length();
+                word = "CLOCK"; phrase[words] = word; ++words; phraselen += word.length();
+                if(minute > 20 && (minute%10) != 0) {
+                    word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                } else {
+                    word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
+                }
+                word = "MINUTES";
+                if(minute == 1)
+                    word = "MINUTE";
+                phrase[words] = word; ++words; phraselen += word.length();
 
-        word = "AND"; phrase[words] = word; ++words; phraselen += word.length();
-        if(second > 20 && (second%10) != 0) {
-            word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
-            word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
-        } else {
-            word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
-        }
-        word = "SECONDS"; phrase[words] = word; ++words; phraselen += word.length();
-        pad_check_phrase(phrase, words, phraselen);
+                word = "AND"; phrase[words] = word; ++words; phraselen += word.length();
+                if(second > 20 && (second%10) != 0) {
+                    word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                } else {
+                    word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
+                }
+                word = "SECONDS"; phrase[words] = word; ++words; phraselen += word.length();
+                pad_check_phrase(phrase, words, phraselen);
+            }
 }
 
-void format_2(int hour, int minute, int second) {
-        words = 0;
-        phraselen = 0;
-        string word = num[hour]; phrase[words] = word; ++words; phraselen += word.length();
-        word = "O"; phrase[words] = word; ++words; phraselen += word.length();
-        word = "CLOCK"; phrase[words] = word; ++words; phraselen += word.length();
-        if(minute > 20 && (minute%10) != 0) {
-            word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
-            word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
-        } else {
-            word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
-        }
-        word = "MINUTES";
-        if(minute == 1)
-            word = "MINUTE";
-        phrase[words] = word; ++words; phraselen += word.length();
-        if(second > 20 && (second%10) != 0) {
-            word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
-            word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
-        } else {
-            word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
-        }
-        word = "SECONDS"; phrase[words] = word; ++words; phraselen += word.length();
-        pad_check_phrase(phrase, words, phraselen);
+void format_2(int hour, int max_hour) {
+    for(; hour < max_hour; hour++)
+        for(int minute = 0; minute <= 5; minute++)
+            for(int second = 0; second < 60; second++) {
+                if(minute == 5 and second >0)
+                    break;
+                words = 0;
+                phraselen = 0;
+                string word = num[hour]; phrase[words] = word; ++words; phraselen += word.length();
+                word = "O"; phrase[words] = word; ++words; phraselen += word.length();
+                word = "CLOCK"; phrase[words] = word; ++words; phraselen += word.length();
+                if(minute > 20 && (minute%10) != 0) {
+                    word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                } else {
+                    word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
+                }
+                word = "MINUTES";
+                if(minute == 1)
+                    word = "MINUTE";
+                phrase[words] = word; ++words; phraselen += word.length();
+                if(second > 20 && (second%10) != 0) {
+                    word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                } else {
+                    word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
+                }
+                word = "SECONDS"; phrase[words] = word; ++words; phraselen += word.length();
+                pad_check_phrase(phrase, words, phraselen);
+            }
 }
 
 int main(int argc, char **argv) {
@@ -6200,47 +6212,20 @@ int main(int argc, char **argv) {
 
     printf("crypt: %s(%i)\n", crypt_c, crypt_len);
 
-    for(; hour < max_hour; hour++)
-        for(int minute = 0; minute <= 5; minute++)
-            for(int second = 0; second < 60; second++) {
-                if(minute == 5 and second >0)
-                    break;
-                format_1(hour, minute, second); // FIVE O CLOCK TWO  MINUTE(S) AND TWENTY SEVEN SECOND(S)
-                format_2(hour, minute, second); // ONE  O CLOCK FOUR MINUTE(S)     FIFTY  EIGHT SECOND(S)
-                /*
-                format_3(hour, minute, second); //MEASUREMENT THREE IS AT NINE O THREE AND THIRTY SECONDS
-                format_4(hour, minute, second); //THREE MINUTES FIFTY TWO SECONDS PAST THREE O CLOCK
-                format_5(hour, minute, second); //TWO MINUTES AND SEVEN SECONDS PAST EIGHT PM
-                format_6(hour, minute, second); //TWO MINUTES AND SEVEN SECONDS PAST EIGHT
-                format_7(hour, minute, second); //SIX O CLOCK AND FOUR MINUTES AND THIRTEEN SECONDS
-                format_8(hour, minute, second); //THIRTEEN SECONDS PAST SEVEN O CLOCK SHARP
-                format_9(hour, minute, second); //FOURTY SEVEN SECONDS AND TWO MINUTES PAST TWO PM
-                format_10(hour, minute, second); // THREE O FOUR AND TWO SECONDS
-                format_11(hour, minute, second); //FIFTY FIVE SECONDS AND THREE MINUTES AFTER SEVEN
-                */
-                words = 0;
-                phraselen = 0;
-                word = num[hour]; phrase[words] = word; ++words; phraselen += word.length();
-                word = "O"; phrase[words] = word; ++words; phraselen += word.length();
-                word = "CLOCK"; phrase[words] = word; ++words; phraselen += word.length();
-                if(minute > 20 && (minute%10) != 0) {
-                    word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
-                    word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
-                } else {
-                    word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
-                }
-                word = "MINUTES"; phrase[words] = word; ++words; phraselen += word.length();
-                word = "AND"; phrase[words] = word; ++words; phraselen += word.length();
-                if(second > 20 && (second%10) != 0) {
-                    word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
-                    word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
-                } else {
-                    word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
-                }
-                word = "SECONDS"; phrase[words] = word; ++words; phraselen += word.length();
-                pad_check_phrase(phrase, words, phraselen);
+    format_1(hour, max_hour); // FIVE O CLOCK TWO  MINUTE(S) AND TWENTY SEVEN SECOND(S)
+    format_2(hour, max_hour); // ONE  O CLOCK FOUR MINUTE(S)     FIFTY  EIGHT SECOND(S)
+    /*
+    format_3(hour); //MEASUREMENT THREE IS AT NINE O THREE AND THIRTY SECONDS
+    format_4(hour); //THREE MINUTES FIFTY TWO SECONDS PAST THREE O CLOCK
+    format_5(hour); //TWO MINUTES AND SEVEN SECONDS PAST EIGHT PM
+    format_6(hour); //TWO MINUTES AND SEVEN SECONDS PAST EIGHT
+    format_7(hour); //SIX O CLOCK AND FOUR MINUTES AND THIRTEEN SECONDS
+    format_8(hour); //THIRTEEN SECONDS PAST SEVEN O CLOCK SHARP
+    format_9(hour); //FOURTY SEVEN SECONDS AND TWO MINUTES PAST TWO PM
+    format_10(hour); // THREE O FOUR AND TWO SECONDS
+    format_11(hour); //FIFTY FIVE SECONDS AND THREE MINUTES AFTER SEVEN
+    */
 //printf("phrase: %s(%i)\n" "MD5:    %s\n" "OTP:    %s\n", phrasestr.c_str(), phrasestr.length(), MD5_c, get_key_for_crypt_phrase(crypt, phrasestr).c_str());
-            }
     fprintf(stderr, "[ii] Not found, skipping random guessing\n");
     exit(1);
     fprintf(stderr,"[ii] Format Checks Finished, Starting Random Guessing\n");

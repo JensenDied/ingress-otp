@@ -1,11 +1,18 @@
 CC = g++
-CCFLAGS = -Wall -std=c++11 -g3 -pg
+CCFLAGS = -Wall -std=c++11
 BPATH = ./bin/
 OPATH = ./obj/
 SPATH = ./src/
 BNAME = otp
 
 all: otp.o md5.o Link
+
+debug: CCFLAGS += -g3 -pg
+debug: all
+
+fast: CCFLAGS += -O2
+fast: all
+
 
 
 Link:

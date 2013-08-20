@@ -23,6 +23,6 @@ bin/otp.bin: obj/otp.o obj/permutation_base.o obj/md5.o
 otp.bin: bin/otp.bin
 	ln -f $(BPATH)$(BNAME).bin $(BNAME).bin
 
-clean: obj/otp.o obj/permutation_base.o obj/md5.o bin/otp.bin
-	rm -f $^
+clean:
+	rm -f ./obj/*.o ./bin/*.bin ./otp.bin
 

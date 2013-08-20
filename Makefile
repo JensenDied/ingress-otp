@@ -8,10 +8,10 @@ BNAME = otp
 
 all: otp.bin
 
-debug: CCFLAGS += -g3 -pg
+debug: CCFLAGS += -Og -pg
 debug: all
 
-fast: CCFLAGS += -O2
+fast: CCFLAGS += -Ofast -march=native -msse4.2
 fast: all
 
 obj/%.o: src/%.c

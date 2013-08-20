@@ -1,6 +1,7 @@
 #include "permutation_base.h"
 
-void pb_init() {
+vector< vector<      vector      <int> > > pb_init() {
+    vector< vector<      vector      <int> > > base_permutations;
     vector<int> v;
     vector<vector<int>> vv;
     vv.push_back(vector<int>(0));
@@ -7498,5 +7499,5 @@ void pb_init() {
         vv.push_back(v);
     }
     base_permutations.push_back(vv);
-
+    return base_permutations;
 }

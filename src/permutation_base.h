@@ -1,6 +1,8 @@
+#ifndef PERMUTATION_BASE_H
+#define PERMUTATION_BASE_H
 #include <vector>
 using std::vector;
-static vector< vector<      vector      <int> > > base_permutations;
-void pb_init();
+vector< vector<      vector      <int> > > pb_init();
 //    container  [n]   permutations, permutation, val
 
+#endif

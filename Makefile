@@ -5,7 +5,8 @@ OPATH = ./obj/
 SPATH = ./src/
 BNAME = otp
 
-all: otp.o md5.o Link
+
+all: otp.bin
 
 debug: CCFLAGS += -g3 -pg
 debug: all
@@ -13,18 +14,15 @@ debug: all
 fast: CCFLAGS += -O2
 fast: all
 
+obj/%.o: src/%.c
+	$(CC) $(CCFLAGS) -c $< -o $@
 
+bin/otp.bin: obj/otp.o obj/permutation_base.o obj/md5.o
+	$(CC) $(CCFLAGS) -o $@ $^
 
-Link:
-	$(CC) $(CCFLAGS) -o $(BPATH)$(BNAME).bin $(OPATH)*.o
+otp.bin: bin/otp.bin
 	ln -f $(BPATH)$(BNAME).bin $(BNAME).bin
 
-md5.o:
-	$(CC) $(CCFLAGS) -c $(SPATH)md5.c -o $(OPATH)md5.o
-
-otp.o:
-	$(CC) $(CCFLAGS) -c $(SPATH)otp.c -o $(OPATH)otp.o
-
-clean: 
-	rm -f $(OPATH)*.o $(BPATH)$(BNAME).bin $(BNAME).bin
+clean: obj/otp.o obj/permutation_base.o obj/md5.o bin/otp.bin
+	rm -f $^
 

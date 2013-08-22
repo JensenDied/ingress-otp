@@ -116,6 +116,19 @@ MD5::MD5(const std::string &text)
   finalize();
 }
 
+MD5::MD5(const std::string &text, int load)
+{
+    char c[3] = "  ";
+    uint1 n;
+    for(int i = 0; i < 16; ++i) {
+        c[0] = text[2*i];
+        c[1] = text[2*i+1];
+        n = strtoul( c, NULL, 16 );
+        this->digest[i] = n;
+    }
+    finalized = true;
+}
+
 //////////////////////////////
 
 void MD5::init()
@@ -351,6 +364,20 @@ std::string MD5::hexdigest() const
 std::ostream& operator<<(std::ostream& out, MD5 md5)
 {
   return out << md5.hexdigest();
+}
+
+bool MD5::operator!=(const MD5 &md5) const {
+    for(int i = 0; i < 16; ++i)
+        if(md5.digest[i] != this->digest[i])
+            return true;
+    return false;
+}
+
+bool MD5::operator==(const MD5 &md5) const {
+    for(int i = 0; i < 16; ++i)
+        if(md5.digest[i] != this->digest[i])
+            return false;
+    return true;
 }
 
 //////////////////////////////

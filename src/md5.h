@@ -54,12 +54,14 @@ public:
 
   MD5();
   MD5(const std::string& text);
+  MD5(const std::string &text, int load);
   void update(const unsigned char *buf, size_type length);
   void update(const char *buf, size_type length);
   MD5& finalize();
   std::string hexdigest() const;
-  std::string hexdigest2() const;
   friend std::ostream& operator<<(std::ostream&, MD5 md5);
+  bool operator!=(const MD5 &md5) const;
+  bool operator==(const MD5 &md5) const;
 
 private:
   void init();

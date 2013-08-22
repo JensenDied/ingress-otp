@@ -1,8 +1,4 @@
-#!/bin/sh
-echo "----"
-echo "---- Invalid MD5 Error Test"
-echo "----"
-./otp.bin PHPUHTXFJZCQPKVACWBDSZTVAJKLEWGKVPYQXFGKMWWJYDJZF 029d2072bd788bac6ebfcf431c59000
+#!/bin/bash
 echo "----"
 echo "---- Starting Format Tests"
 echo "----"
@@ -26,6 +22,9 @@ echo "---- format 3"
 echo "-- Sydney 2"
 time ./otp.bin VJUCHIYAIVIYYCPXYGTJOBZDCDNMLZJYJRDAUYZICNQRQTNUWKHZDUDHOTB 544444f7085ec9c2bd6152c25e808e2d 2 3
 
+echo "---- format 12"
+echo "-- Paris 1"
+time ./otp.bin VHAZKCXSDWUETLPDVYIQPTQTZRLLRDQTAPCMMAMNCQROTRTDTQWHMXRTUSV 913689159c64388286f36d451bba48fc 7 12
 echo "----"
 echo "---- Starting Batch Test"
 echo "----"

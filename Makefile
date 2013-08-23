@@ -8,8 +8,11 @@ BNAME = otp
 
 all: otp.bin
 
+debugclean:
+	rm -f ./obj/otp.o ./obj/md5.o ./bin/*.bin ./otp.bin
+
 debug: CCFLAGS += -g -pg
-debug: all
+debug: debugclean all
 
 fast: CCFLAGS += -Ofast -march=native
 fast: all

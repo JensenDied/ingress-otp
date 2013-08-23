@@ -43,15 +43,14 @@ static string phrasestr;
 static vector< vector<      vector      <int> > > base_permutations;
 
 void checkphrase(string str) {
-    string key = get_key_for_crypt_phrase(crypt, str);
     if(++attempts %250000 == 0) {
         fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s(%i)\n", attempts, skips, str.c_str(), str.length());
     }
-    if(OTP_md5 == MD5(key)) {
+    if(OTP_md5 == MD5(get_key_for_crypt_phrase(crypt, str))) {
         printf("Found at Hash(%llu)\n"
                 "phrase: %s(%i)\n"
                 "MD5:    %s\n"
-                "OTP:    %s\n", attempts, str.c_str(), str.length(), OTP_md5.hexdigest().c_str(), key.c_str());
+                "OTP:    %s\n", attempts, str.c_str(), str.length(), OTP_md5.hexdigest().c_str(), keybuff);
         exit(0);
     }
 }
@@ -102,15 +101,14 @@ string get_key_for_crypt_phrase(const string crypt, const string phrase) {
     //K:EFWPWW
     //S:SECOND
     //string rot;
-    int len = crypt.length();
     char c;
-    for(int i = 0; i<len; i++) {
+    for(unsigned int i = 0; i<crypt_len; ++i) {
         c = crypt[i] - (phrase[i] - 'A');
         if(c < 'A')
             c+=26;
         keybuff[i]= c;
     }
-    keybuff[len] = 0;
+    keybuff[crypt_len] = 0;
     return keybuff;
 }
 
@@ -381,6 +379,7 @@ int main(int argc, char **argv) {
             n_format = 0;
     }
     keybuff = new char[crypt_len+1];
+    memset(keybuff, 0, crypt_len);
     padbuff = new char[crypt_len+1];
     //test();
     multimap<string,string> mm = mm_init();

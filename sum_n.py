@@ -14,7 +14,7 @@ def sum_to_n(n, size, limit=None):
         for tail in sum_to_n(n - i, size - 1, i):
             yield [i] + tail
 
-for n in range(30,31):
+for n in range(29,30):
     for i in range(1, n+1):
         for partition in sum_to_n(n, i):
             print partition

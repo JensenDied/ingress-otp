@@ -14,20 +14,9 @@ def sum_to_n(n, size, limit=None):
         for tail in sum_to_n(n - i, size - 1, i):
             yield [i] + tail
 
-for n in range(30,31):
+for n in range(35,36):
     for i in range(1, n+1):
         for partition in sum_to_n(n, i):
             print partition
 
 
-#from itertools import combinations, chain
-
-#def sum_to_n(n):
-    #'Generate the series of +ve integer lists which sum to a +ve integer, n.'
-    #from operator import sub
-    #b, mid, e = [0], list(range(1, n)), [n]
-    #splits = (d for i in range(n) for d in combinations(mid, i)) 
-    #return (list(map(sub, chain(s, e), chain(b, s))) for s in splits)
-
-#for p in sum_to_n(3):
-    #print p

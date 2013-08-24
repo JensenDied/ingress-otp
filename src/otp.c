@@ -57,7 +57,7 @@ inline void checkphrase(const char *str) {
 
 
 vector<vector<int>> get_permutation_base(int val) {
-    int max = 30;
+    int max = 35;
     if(val > max) {
         fprintf(stderr, "[WW] Requested permutation val(%i) not supported\n", val);
         val = 1;
@@ -115,6 +115,7 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
         }
         std::sort(base.begin(), base.end());
         do {
+            //++attempts;continue;
             memset(padbuff, 'X', encrypted_string_len);
             k = 0;
             // i word counter / padarr pos
@@ -162,8 +163,8 @@ void format_1() { // 17.2B
 //%s SECONDS AND %m MINUTES AFTER THE HOUR SHARP
     int minute, second, modval;
     string word;
-    for(minute = start_minute; minute <= 5; minute++) {
-        for(second = start_second; second < 70; second++) { // 60-69 is the alternate forty / fourty
+    for(minute = start_minute; minute <= end_minute; minute++) {
+        for(second = start_second; second < end_second; second++) { // 60-69 is the alternate forty / fourty
             if((minute == 5 && second > 0) || (minute > end_minute || (minute >= end_minute && second > end_second)))
                 break;
             for(modval = 0; modval < 16; ++modval) {
@@ -256,6 +257,121 @@ void format_1() { // 17.2B
                     ++words;
                 }
                 pad_check_phrase(phrase, words, phraselen);
+            }
+        }
+    }
+}
+
+void format_2() {
+//&0  %h O CLOCK     %m MINUTES     %s SECONDS #Elide seconds at 0
+//&1  %h O CLOCK AND %m MINUTES     %s SECONDS
+//&2  %h O CLOCK     %m MINUTES AND %s SECONDS
+//&3  %h O CLOCK AND %m MINUTES AND %s SECONDS
+//&4  %h O CLOCK     %m MINUTES     %s SEC
+//&5  %h O CLOCK AND %m MINUTES     %s SEC
+//&6  %h O CLOCK     %m MINUTES AND %s SEC
+//&7  %h O CLOCK AND %m MINUTES AND %s SEC
+//8-15: Reverse Minutes/ Seconds
+    int hour, minute, second, modval;
+    string word;
+    for(hour = start_hour; hour <= end_hour; hour++) {
+        int hour_len = num[hour].length();
+        phrase[0] = num[hour];
+        phrase[1] = "O";
+        phrase[2] = "CLOCK";
+        for(minute = start_minute; minute <= end_minute; minute++) {
+            for(second = start_second; second < end_second; second++) {
+                if((minute == 5 && second > 0) || (minute > end_minute || (minute >= end_minute && second > end_second)))
+                    break;
+                for(modval = 0; modval < 16; ++modval) {
+                    phraselen = hour_len + 6;
+                    words = 3;
+                    if(modval&1) { // First AND
+                        phrase[words] = "AND";
+                        ++words;
+                        phraselen += 3;
+                    }
+                    if(modval&8) { // Seconds First
+                        if(minute > 20 && (minute%10) != 0) {
+                            word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                            word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        } else {
+                            word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
+                        }
+                        if(minute == 1) {
+                            phrase[words] = "MINUTE";
+                            phraselen += 6;
+                        } else {
+                            phrase[words] = "MINUTES";
+                            phraselen += 7;
+                        }
+                        ++words;
+                    } else {
+                        if(second > 0 ) {
+                            if(second > 20 && (second%10) != 0) {
+                                word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                                word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                            } else {
+                                word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
+                            }
+                            if(modval &4) {
+                                phrase[words] = "SEC";
+                                phraselen += 3;
+                            } else {
+                                if(second == 1) {
+                                    phrase[words] = "SECOND";
+                                    phraselen += 6;
+                                } else {
+                                    phrase[words] = "SECONDS";
+                                    phraselen += 7;
+                                }
+                            }
+                            ++words;
+                        }
+                    }
+                    if(modval&2) {
+                        phrase[words] = "AND";
+                        ++words;
+                        phraselen += 3;
+                    }
+                    if(modval&8) { // Seconds Second
+                        if(second > 20 && (second%10) != 0) {
+                            word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                            word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        } else {
+                            word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
+                        }
+                        if(modval &4) {
+                            phrase[words] = "SEC";
+                            phraselen += 3;
+                        } else {
+                            if(second == 1) {
+                                phrase[words] = "SECOND";
+                                phraselen += 6;
+                            } else {
+                                phrase[words] = "SECONDS";
+                                phraselen += 7;
+                            }
+                        }
+                        ++words;
+                    } else {
+                        if(minute > 20 && (minute%10) != 0) {
+                            word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                            word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        } else {
+                            word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
+                        }
+                        if(minute == 1) {
+                            phrase[words] = "MINUTE";
+                            phraselen += 6;
+                        } else {
+                            phrase[words] = "MINUTES";
+                            phraselen += 7;
+                        }
+                        ++words;
+                    }
+                    pad_check_phrase(phrase, words, phraselen);
+                }
             }
         }
     }
@@ -370,11 +486,15 @@ int main(int argc, char **argv) {
     printf("encrypted_string: %s(%i)format(%i)\n", encrypted_string_c, encrypted_string_len, n_format);
 
     switch(n_format) {
-        case: 1
+        case 1:
             format_1();
+            break;
+        case 2:
+            format_2();
             break;
         default:
             format_1();
+            format_2();
     }
     fprintf(stderr, "[ii] Not found in %llu attempts with known formats\n", attempts);
     exit(1);

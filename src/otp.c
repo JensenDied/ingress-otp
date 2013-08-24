@@ -57,7 +57,7 @@ inline void checkphrase(const char *str) {
 
 
 vector<vector<int>> get_permutation_base(int val) {
-    int max = 35;
+    int max = 32;
     if(val > max) {
         fprintf(stderr, "[WW] Requested permutation val(%i) not supported\n", val);
         val = 1;

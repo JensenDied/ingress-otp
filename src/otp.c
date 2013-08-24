@@ -21,43 +21,42 @@ using std::vector;
 
 // Ideas
 // Random strings based on valid keyspace for letters
-// Random assembling of words and padding and xor'ing against the crypt and hashing the result
+// Random assembling of words and padding and xor'ing against the encrypted_string and hashing the result
 // Markov chain words and the above.
-void test();
 multimap <string, string> mm_init();
-string get_key_for_crypt_phrase(const string crypt, const string phrase);
+string get_key_for_encrypted_string_phrase(const string phrase);
 
 static unsigned long long attempts;
 static unsigned int skips;
 static char *keybuff;
 static char *padbuff;
-static string crypt;
-static const char *crypt_c;
-static unsigned int crypt_len;
+static string encrypted_string;
+static const char *encrypted_string_c;
+static unsigned int encrypted_string_len;
 static MD5 OTP_md5;
 static unsigned int phraselen;
 static unsigned int words;
 static string *phrase;
-static string num[60];
+static vector <string> num;
 static string phrasestr;
-static vector< vector<      vector      <int> > > base_permutations;
+static vector< vector <vector  <int> > > base_permutations;
 
-void checkphrase(string str) {
-    if(++attempts %250000 == 0) {
-        fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s(%i)\n", attempts, skips, str.c_str(), str.length());
+inline void checkphrase(const char *str) {
+    if(++attempts %500000 == 0) {
+        fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s\n", attempts, skips, padbuff);
     }
-    if(OTP_md5 == MD5(get_key_for_crypt_phrase(crypt, str))) {
+    if(OTP_md5 == MD5(get_key_for_encrypted_string_phrase(str))) {
         printf("Found at Hash(%llu)\n"
-                "phrase: %s(%i)\n"
+                "phrase: %s\n"
                 "MD5:    %s\n"
-                "OTP:    %s\n", attempts, str.c_str(), str.length(), OTP_md5.hexdigest().c_str(), keybuff);
+                "OTP:    %s\n", attempts, str, OTP_md5.hexdigest().c_str(), keybuff);
         exit(0);
     }
 }
 
 
 vector<vector<int>> get_permutation_base(int val) {
-    int max = 29;
+    int max = 30;
     if(val > max) {
         fprintf(stderr, "[WW] Requested permutation val(%i) not supported\n", val);
         val = 1;
@@ -80,43 +79,26 @@ string random_element(const string elements[]) {
     return elements[std::rand()%number];
 }
 
-string get_key_for_search(const string crypt, const string search) {
-    //C:WJYDJZ
-    //K:EFWPWW
-    //S:SECOND
-    string rot;
-    int len = search.length();
-    char c;
-    for(int i = 0; i<len; i++) {
-        c = crypt[i] - search[i] - 'A';
-        if(c < 0)
-            c+=26;
-        rot += 'A'+c;
-    }
-    return rot;
-}
-
-string get_key_for_crypt_phrase(const string crypt, const string phrase) {
+string get_key_for_encrypted_string_phrase(const string phrase) {
     //C:WJYDJZ
     //K:EFWPWW
     //S:SECOND
     //string rot;
     char c;
-    for(unsigned int i = 0; i<crypt_len; ++i) {
-        c = crypt[i] - (phrase[i] - 'A');
+    for(unsigned int i = 0; i<encrypted_string_len; ++i) {
+        c = encrypted_string[i] - (phrase[i] - 'A');
         if(c < 'A')
             c+=26;
         keybuff[i]= c;
     }
-    keybuff[crypt_len] = 0;
     return keybuff;
 }
 
-string pad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen) {
-    int budget = crypt_len - plen - words+1; //only required to fill spaces between words
+void pad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen) {
+    int budget = encrypted_string_len - plen - words+1; //only required to fill spaces between words
     if(budget < 0) {
         ++skips;
-        return "";
+        return;
     }
     unsigned int i, j, k, l;
     int base_s = words+1;
@@ -132,7 +114,7 @@ string pad_check_phrase(const string phrase[], const unsigned int words, const u
         }
         std::sort(base.begin(), base.end());
         do {
-            memset(padbuff, 'X', crypt_len);
+            memset(padbuff, 'X', encrypted_string_len);
             k = 0;
             // i word counter / padarr pos
             // k padbuff position
@@ -149,24 +131,24 @@ string pad_check_phrase(const string phrase[], const unsigned int words, const u
                 }
             }
             k += base[words];
-            if(k != crypt_len) {
+            /* // This seems to have been resolved
+            if(k != encrypted_string_len) {
                 fprintf(stderr, "[ww] Possible buffer permutation issue, budget: %i, k: %i\n", budget, k);
                 for(unsigned int a = 0; a < base.size(); ++a) {
                     fprintf(stderr, "[%i]", base[a]);
                 }
                 fprintf(stderr, "\n");
-            }
-            checkphrase(string(padbuff, crypt_len));
+            } */
+            checkphrase(padbuff);
         } while(std::next_permutation(base.begin(), base.end()));
     }
-    return string(padbuff, crypt_len);
 }
 
-string nopad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen) {
-    int budget = crypt_len - plen; 
+void nopad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen) {
+    int budget = encrypted_string_len - plen; 
     if(budget < 0) {
         ++skips;
-        return "";
+        return;
     }
     unsigned int i, j, k, l;
     int base_s = words+1;
@@ -182,7 +164,7 @@ string nopad_check_phrase(const string phrase[], const unsigned int words, const
         }
         std::sort(base.begin(), base.end());
         do {
-            memset(padbuff, 'X', crypt_len);
+            memset(padbuff, 'X', encrypted_string_len);
             k = 0;
             // i word counter / padarr pos
             // k padbuff position
@@ -196,17 +178,17 @@ string nopad_check_phrase(const string phrase[], const unsigned int words, const
                 }
             }
             k += base[words];
-            if(k != crypt_len) {
+            /* // This seems to have been resolved
+            if(k != encrypted_string_len) {
                 fprintf(stderr, "[ww] Possible buffer permutation issue, budget: %i, k: %i\n", budget, k);
                 for(unsigned int a = 0; a < base.size(); ++a) {
                     fprintf(stderr, "[%i]", base[a]);
                 }
                 fprintf(stderr, "\n");
-            }
-            checkphrase(string(padbuff, crypt_len));
+            } */
+            checkphrase(padbuff);
         } while(std::next_permutation(base.begin(), base.end()));
     }
-    return string(padbuff, crypt_len);
 }
 
 // FIVE O CLOCK TWO  MINUTE(S) AND TWENTY SEVEN SECOND(S)
@@ -347,52 +329,169 @@ void format_12(int hour, int max_hour) {
             }
 }
 
+void format_chi() {
+//%m MINUTES %s SECONDS PAST THE HOUR
+//%m MINUTES %s SECONDS AFTER THE HOUR
+//%m MINUTES AND %s SECONDS PAST THE HOUR
+//%m MINUTES AND %s SECONDS AFTER THE HOUR
+//%m MINUTES %s SECONDS PAST THE HOUR SHARP
+//%m MINUTES %s SECONDS AFTER THE HOUR SHARP
+//%m MINUTES AND %s SECONDS PAST THE HOUR SHARP
+//%m MINUTES AND %s SECONDS AFTER THE HOUR SHARP
+//%s SECONDS %m MINUTES PAST THE HOUR
+//%s SECONDS %m MINUTES AFTER THE HOUR
+//%s SECONDS AND %m MINUTES PAST THE HOUR
+//%s SECONDS AND %m MINUTES AFTER THE HOUR
+//%s SECONDS %m MINUTES PAST THE HOUR SHARP
+//%s SECONDS %m MINUTES AFTER THE HOUR SHARP
+//%s SECONDS AND %m MINUTES PAST THE HOUR SHARP
+//%s SECONDS AND %m MINUTES AFTER THE HOUR SHARP
+    int minute, second, modval;
+    string word;
+    for(minute = 0; minute <= 5; minute++) {
+        for(second = 0; second < 70; second++) { // 60-69 is the alternate forty / fourty
+            if(minute == 5 and second >0)
+                break;
+            for(modval = 0; modval < 16; ++modval) {
+                words = 0;
+                phraselen = 0;
+                if(modval&8) { // Minutes First
+                    if(minute > 20 && (minute%10) != 0) {
+                        word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    } else {
+                        word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
+                    }
+                    if(minute == 1) {
+                        phrase[words] = "MINUTE";
+                        phraselen += 6;
+                    } else {
+                        phrase[words] = "MINUTES";
+                        phraselen += 7;
+                    }
+                    ++words;
+                } else {
+                    if(second > 20 && (second%10) != 0) {
+                        word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    } else {
+                        word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
+                    }
+                    if(second == 1) {
+                        phrase[words] = "SECOND";
+                        phraselen += 6;
+                    } else {
+                        phrase[words] = "SECONDS";
+                        phraselen += 7;
+                    }
+                    ++words;
+                }
+                if(modval&2) {
+                    phrase[words] = "AND";
+                    ++words;
+                    phraselen += 3;
+                }
+                if(modval&8) { // Seconds Second
+                    if(second > 20 && (second%10) != 0) {
+                        word = num[second - second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        word = num[second%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    } else {
+                        word = num[second]; phrase[words] = word; ++words; phraselen += word.length();
+                    }
+                    if(second == 1) {
+                        phrase[words] = "SECOND";
+                        phraselen += 6;
+                    } else {
+                        phrase[words] = "SECONDS";
+                        phraselen += 7;
+                    }
+                    ++words;
+                } else {
+                    if(minute > 20 && (minute%10) != 0) {
+                        word = num[minute - minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                        word = num[minute%10]; phrase[words] = word; ++words; phraselen += word.length();
+                    } else {
+                        word = num[minute]; phrase[words] = word; ++words; phraselen += word.length();
+                    }
+                    if(minute == 1) {
+                        phrase[words] = "MINUTE";
+                        phraselen += 6;
+                    } else {
+                        phrase[words] = "MINUTES";
+                        phraselen += 7;
+                    }
+                    ++words;
+                }
+                if(modval&1) { // 0: PAST, 1: AFTER
+                    phrase[words] = "AFTER";
+                    phraselen += 5;
+                } else {
+                    phrase[words] = "PAST";
+                    phraselen += 4;
+                }
+                ++words;
+                phrase[words] = "THE";
+                phraselen += 3;
+                ++words;
+                phrase[words] = "HOUR";
+                phraselen += 4;
+                ++words;
+                if(modval&4) { // Ends in Sharp
+                    phrase[words] = "SHARP";
+                    phraselen += 5;
+                    ++words;
+                }
+                nopad_check_phrase(phrase, words, phraselen);
+            }
+        }
+    }
+}
 int main(int argc, char **argv) {
     if(argc < 3 || argc > 5) {
-        fprintf(stderr, "Usage:\n\t%s crypt md5 [hour] [format]\n", argv[0]);
+        fprintf(stderr, "Usage:\n\t%s encrypted_string md5 [format] [hour]\n", argv[0]);
         exit(1);
     }
     srand ( time(NULL) );
-    crypt = argv[1];
-    crypt_c = crypt.c_str();
-    crypt_len= crypt.length();
+    encrypted_string = argv[1];
+    encrypted_string_c = encrypted_string.c_str();
+    encrypted_string_len= encrypted_string.length();
     OTP_md5 = MD5(argv[2], 1);
     if(OTP_md5.hexdigest().length() != 32) {
         fprintf(stderr, "Malformed MD5 string: %s\n", OTP_md5.hexdigest().c_str());
         exit(1);
     }
-    printf("MD5(OTP).hexdigest(): %s(%i)\n", OTP_md5.hexdigest().c_str(), OTP_md5.hexdigest().length());
-    int hour = 1;
-    int max_hour = 12;
-    if(argc >= 4) {
-        hour = atoi(argv[3]);
-        max_hour = hour+1;
-    }
+    printf("MD5(OTP).hexdigest(): %s(%zi)\n", OTP_md5.hexdigest().c_str(), OTP_md5.hexdigest().length());
     int n_format = 0;
-    if(argc >= 5) {
-        n_format = atoi(argv[4]);
-        if(n_format > 12) {
-            fprintf(stderr, "Max formats: 11\n");
+    if(argc >= 4) {
+        n_format = atoi(argv[3]);
+        if(n_format > 13) {
+            fprintf(stderr, "Max formats: 13\n");
             exit(1);
         }
         if(n_format < 0)
             n_format = 0;
     }
-    keybuff = new char[crypt_len+1];
-    memset(keybuff, 0, crypt_len);
-    padbuff = new char[crypt_len+1];
-    //test();
+    int hour = 1;
+    int max_hour = 12;
+    if(argc >= 5) {
+        hour = atoi(argv[4]);
+        max_hour = hour+1;
+    }
+    keybuff = new char[encrypted_string_len+1];
+    memset(keybuff, 0, encrypted_string_len);
+    padbuff = new char[encrypted_string_len+1];
+    memset(padbuff, 'X', encrypted_string_len);
     multimap<string,string> mm = mm_init();
-    base_permutations = pb_init();
-    auto init = std::initializer_list<string>({ "ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN", "TWENTY", "TWENTYONE", "TWENTYTWO", "TWENTYTHREE", "TWENTYFOUR", "TWENTYFIVE", "TWENTYSIX", "TWENTYSEVEN", "TWENTYEIGHT", "TWENTYNINE", "THIRTY", "THIRTYONE", "THIRTYTWO", "THIRTYTHREE", "THIRTYFOUR", "THIRTYFIVE", "THIRTYSIX", "THIRTYSEVEN", "THIRTYEIGHT", "THIRTYNINE", "FORTY", "FORTYONE", "FORTYTWO", "FORTYTHREE", "FORTYFOUR", "FORTYFIVE", "FORTYSIX", "FORTYSEVEN", "FORTYEIGHT", "FORTYNINE", "FIFTY", "FIFTYONE", "FIFTYTWO", "FIFTYTHREE", "FIFTYFOUR", "FIFTYFIVE", "FIFTYSIX", "FIFTYSEVEN", "FIFTYEIGHT", "FIFTYNINE", });
-    std::copy(init.begin(), init.end(), num);
+    base_permutations = *pb_init();
+    // These numbers will largely only be used 1-9 and 10,20,30,40,50. Added variation of fourty/forty as sixty
+    num = vector <string>({ "ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN", "TWENTY", "TWENTYONE", "TWENTYTWO", "TWENTYTHREE", "TWENTYFOUR", "TWENTYFIVE", "TWENTYSIX", "TWENTYSEVEN", "TWENTYEIGHT", "TWENTYNINE", "THIRTY", "THIRTYONE", "THIRTYTWO", "THIRTYTHREE", "THIRTYFOUR", "THIRTYFIVE", "THIRTYSIX", "THIRTYSEVEN", "THIRTYEIGHT", "THIRTYNINE", "FORTY", "FORTYONE", "FORTYTWO", "FORTYTHREE", "FORTYFOUR", "FORTYFIVE", "FORTYSIX", "FORTYSEVEN", "FORTYEIGHT", "FORTYNINE", "FIFTY", "FIFTYONE", "FIFTYTWO", "FIFTYTHREE", "FIFTYFOUR", "FIFTYFIVE", "FIFTYSIX", "FIFTYSEVEN", "FIFTYEIGHT", "FIFTYNINE", "FOURTY", "FOURTYONE", "FOURTYTWO", "FOURTYTHREE", "FOURTYFOUR", "FOURTYFIVE", "FOURTYSIX", "FOURTYSEVEN", "FOURTYEIGHT", "FOURTYNINE" });
 
     set<string> myset;
     for(multimap<string, string>::iterator it = mm.begin(), end = mm.end(); it != end; it = mm.upper_bound(it->first)) {
         myset.insert(it->first);
     }
 
-    set<string>::iterator mbegin = myset.begin(), mysetit;
+    //set<string>::iterator mbegin = myset.begin(), mysetit;
     //int setlen = myset.size();
     phraselen = 0;
     words = 0;
@@ -401,9 +500,8 @@ int main(int argc, char **argv) {
     attempts = 0;
     skips=0;
     string word, lword;
-    unsigned int fails = 0;
 
-    printf("crypt: %s(%i)format(%i)\n", crypt_c, crypt_len, n_format);
+    printf("encrypted_string: %s(%i)format(%i)\n", encrypted_string_c, encrypted_string_len, n_format);
 
     switch(n_format) {
         case 1:     // XOXX*.*CLOCKXX*.*MINUTE.*XANDXX*.*XSECOND
@@ -416,6 +514,9 @@ int main(int argc, char **argv) {
             format_3(hour, max_hour); //SIX O CLOCK AND FOUR MINUTES AND THIRTEEN SECONDS
         case 12:
             format_12(hour, max_hour); //      SEVENOCLOCK AND THREE MINUTES     AND THIRTYFIVE SEC
+            break;
+        case 13:
+            format_chi();
             break;
         default:
             format_1(hour, max_hour); // FIVE O CLOCK TWO  MINUTE(S) AND TWENTY SEVEN SECOND(S)
@@ -433,116 +534,11 @@ int main(int argc, char **argv) {
     format_11(hour); //FIFTY FIVE SECONDS AND THREE MINUTES AFTER SEVEN
     format_13(hour); // TWO MINUTES AND FIFTY TWO SECONDS AFTER  THE HOUR
     */
-//printf("phrase: %s(%i)\n" "MD5:    %s\n" "OTP:    %s\n", phrasestr.c_str(), phrasestr.length(), MD5_c, get_key_for_crypt_phrase(crypt, phrasestr).c_str());
-    fprintf(stderr, "[ii] Not found in %llu attempts, skipping random guessing\n", attempts);
+    fprintf(stderr, "[ii] Not found in %llu attempts with known formats\n", attempts);
     exit(1);
-    fprintf(stderr,"[ii] Format Checks Finished, Starting Random Guessing\n");
-    while(OTP_md5 != MD5(get_key_for_crypt_phrase(crypt, phrasestr))) {
-        phraselen = 0;
-        words = 0;
-        fails = 0;
-        /*mysetit = mbegin;
-        advance(mysetit, std::rand() % setlen);
-        word = *mysetit;*/
-        word = "FIVE";
-        phrase[words]= word;
-        phraselen = word.length();
-        while((phraselen+words) < crypt_len) {
-            ++words;
-            lword = word;
-            word = random_element(mm, lword);
-            if(word.length() == 0  ||(phraselen + words + word.length()) > crypt_len) {
-                --words;
-                word = lword;
-                if(fails == 5) {
-                     break;
-                }
-                ++fails;
-                continue;
-            }
-            phrase[words]= word;
-            phraselen += word.length();
-        }
-        phrasestr = pad_check_phrase(phrase, words, phraselen);
-        if(++attempts %250000 == 0) {
-            fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s(%i)\n", attempts, skips, phrasestr.c_str(), phrasestr.length());
-        }
-    }
-    std::cout << phrasestr << std::endl;
 }
 
 
-void test() {
-    string WORDLIST[] = {"O", "AND", "SECS", "CLOCK", "PAST", "AFTER", "MEASUREMENT", "IS", "AT", "SHARP", "PM", "MINUNTE", "SECOND",
-"ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "EVENTEEN", "EIGHTEEN", "NINETEEN", "TWENTY",
-/*
-"TWENTYONE", "TWENTYTWO", "TWENTYTHREE", "TWENTYFOUR", "TWENTYFIVE", "TWENTYSIX", "TWENTYSEVEN", "TWENTYEIGHT", "TWENTYNINE",
-*/
-"THIRTY",
-/*
-"THIRTYONE", "THIRTYTWO", "THIRTYTHREE", "THIRTYFOUR", "THIRTYFIVE", "THIRTYSIX", "THIRTYSEVEN", "THIRTYEIGHT", "THIRTYNINE",
-*/
-"FORTY",
-/*
-"FORTYONE", "FORTYTWO", "FORTYTHREE", "FORTYFOUR", "FORTYFOUR", "FORTYFIVE", "FORTYSIX", "FORTYSEVEN", "FORTYEIGHT", "FORTYNINE",
-*/
-"FIFTY",
-/*
-"FIFTYONE", "FIFTYTWO", "FIFTYTHREE", "FIFTYFOUR", "FIFTYFIVE", "FIFTYSIX", "FIFTYSEVEN", "FIFTYEIGHT", "FIFTYNINE",
-*/
-// SIXTY
-};
-    int clen = crypt.length();
-    int wlen = sizeof(WORDLIST) / sizeof(WORDLIST[0]);
-
-    //printf("crypt: %s(%i)\n", crypt.c_str(), clen);
-    //printf("words: (%i)\n", wlen);
-    int count = 250000;
-    while(count --> 0) {
-        crypt = md5(crypt);
-    }
-    //printf("%s\n", md5(crypt).c_str());
-    string randword = random_element(WORDLIST);
-    //printf("%s %s\n", randword.c_str(), md5(randword).c_str());
-    string keypart =  get_key_for_search("WJYDJZ" , "SECOND");
-    //printf("Keypart: %s, Expected: %s\n", keypart.c_str(), "EFWPWW");
-
-    char **letters;
-    letters = new char*[clen];
-    int i, j, k;
-    for(i = 0; i < clen; i++) {
-        letters[i]= new char[26];
-    }
-    string s;
-    int word_len;
-    int found;
-    for(i = 0; i<clen; ++i) {
-        found = 0;
-        for(j = 0; j < wlen; ++j) {
-            word_len = WORDLIST[j].length(); 
-            if(word_len + i >= clen)
-                continue;
-            found=1;
-            s = get_key_for_search(crypt.substr(i, word_len), WORDLIST[j]);
-            for(k = 0; k< word_len; k++) {
-                letters[i+k][s[k]-'A'] = 1;
-            }
-        }
-        if(!found)
-            break;
-    }
-    for(i = 0; i<clen; i++) {
-        for(j=0; j<26; j++) {
-            if(letters[i][j] >0) {
-                printf("%c", j+'A');
-            } else {
-                printf(" ");
-            }
-        }
-        printf("\n");
-    }
-
-}
 multimap <string, string> mm_init() {
     // http://www.cplusplus.com/reference/map/multimap/equal_range/
     // Plan: iterate through all keys, hashing final string.

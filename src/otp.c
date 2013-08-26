@@ -442,7 +442,7 @@ int main(int argc, char **argv) {
             if(end_minute < 0) end_minute = 0;
             if(end_minute > 70) end_minute = 70; // Extra timefram for misspelled fourty
         } else if(strcmp("-ss", argv[argpos]) == 0) {
-            end_second = atoi(argv[++argpos]);
+            start_second = atoi(argv[++argpos]);
             if(start_second < 0) start_second = 0;
             if(start_second > 70) start_second = 70; // Extra timefram for misspelled fourty
         } else if(strcmp("-es", argv[argpos]) == 0) {

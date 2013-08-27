@@ -68,7 +68,7 @@ char * get_key_for_encrypted_string_and_padbuff() {
     //string rot;
     char c;
     for(unsigned int i = 0; i<encrypted_string_len; ++i) {
-        c = encrypted_string[i] - (padbuff[i] - 'A');
+        c = encrypted_string_c[i] - (padbuff[i] - 'A');
         if(c < 'A')
             c+=26;
         keybuff[i]= c;

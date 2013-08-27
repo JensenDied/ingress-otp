@@ -54,7 +54,8 @@ public:
 
   MD5();
   MD5(const std::string& text);
-  MD5(const std::string &text, int load);
+  MD5(const char* text, const size_type length);
+  MD5(const char* text, const size_type length, bool load);
   void update(const unsigned char *buf, size_type length);
   void update(const char *buf, size_type length);
   MD5& finalize();

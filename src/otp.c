@@ -19,12 +19,8 @@ using std::set;
 using std::string;
 using std::vector;
 
-// Ideas
-// Random strings based on valid keyspace for letters
-// Random assembling of words and padding and xor'ing against the encrypted_string and hashing the result
-// Markov chain words and the above.
 multimap <string, string> mm_init();
-string get_key_for_encrypted_string_phrase(const string phrase);
+char * get_key_for_encrypted_string_phrase(const string phrase);
 
 static unsigned long long attempts;
 static unsigned int skips;
@@ -46,7 +42,7 @@ inline void checkphrase(const char *str) {
     if(++attempts %500000 == 0) {
         fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s\n", attempts, skips, padbuff);
     }
-    if(OTP_md5 == MD5(get_key_for_encrypted_string_phrase(str))) {
+    if(OTP_md5 == MD5(get_key_for_encrypted_string_phrase(str), encrypted_string_len)) {
         printf("Found at Hash(%llu)\n"
                 "phrase: %s\n"
                 "MD5:    %s\n"
@@ -65,22 +61,7 @@ vector<vector<int>> get_permutation_base(int val) {
     return base_permutations[val];
 }
 
-inline string random_element(const multimap <string, string> mm, const string key) {
-    pair <multimap <string, string>::const_iterator, multimap <string, string>::const_iterator> its = mm.equal_range(key);
-    std::size_t sz = std::distance(its.first, its.second);
-    if(sz == 0)
-        return "";
-    std::size_t idx = std::rand() % sz;
-    advance(its.first, idx);
-    return its.first->second;
-}
-
-string random_element(const string elements[]) {
-    int number = sizeof(elements) / sizeof(elements[0]);
-    return elements[std::rand()%number];
-}
-
-string get_key_for_encrypted_string_phrase(const string phrase) {
+char * get_key_for_encrypted_string_phrase(const string phrase) {
     //C:WJYDJZ
     //K:EFWPWW
     //S:SECOND
@@ -393,11 +374,10 @@ int main(int argc, char **argv) {
     if(argc < 3) {
         exit(usage(argc, argv));
     }
-    srand ( time(NULL) );
     encrypted_string = argv[1];
     encrypted_string_c = encrypted_string.c_str();
     encrypted_string_len= encrypted_string.length();
-    OTP_md5 = MD5(argv[2], 1);
+    OTP_md5 = MD5(argv[2], strlen(argv[2]), true);
     start_hour = 1;
     start_second = 0;
     start_minute = 0;

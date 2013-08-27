@@ -20,7 +20,7 @@ using std::string;
 using std::vector;
 
 multimap <string, string> mm_init();
-char * get_key_for_encrypted_string_phrase(const string phrase);
+char * get_key_for_encrypted_string_and_padbuff();
 
 static unsigned long long attempts;
 static unsigned int skips;
@@ -38,15 +38,15 @@ static string phrasestr;
 static vector< vector <vector  <int> > > base_permutations;
 static int start_hour, end_hour, start_second, start_minute, end_second, end_minute, measurement;
 
-inline void checkphrase(const char *str) {
+inline void check_padbuff() {
     if(++attempts %500000 == 0) {
         fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s\n", attempts, skips, padbuff);
     }
-    if(OTP_md5 == MD5(get_key_for_encrypted_string_phrase(str), encrypted_string_len)) {
+    if(OTP_md5 == MD5(get_key_for_encrypted_string_and_padbuff(), encrypted_string_len)) {
         printf("Found at Hash(%llu)\n"
                 "phrase: %s\n"
                 "MD5:    %s\n"
-                "OTP:    %s\n", attempts, str, OTP_md5.hexdigest().c_str(), keybuff);
+                "OTP:    %s\n", attempts, padbuff, OTP_md5.hexdigest().c_str(), keybuff);
         exit(0);
     }
 }
@@ -61,14 +61,14 @@ vector<vector<int>> get_permutation_base(int val) {
     return base_permutations[val];
 }
 
-char * get_key_for_encrypted_string_phrase(const string phrase) {
+char * get_key_for_encrypted_string_and_padbuff() {
     //C:WJYDJZ
     //K:EFWPWW
     //S:SECOND
     //string rot;
     char c;
     for(unsigned int i = 0; i<encrypted_string_len; ++i) {
-        c = encrypted_string[i] - (phrase[i] - 'A');
+        c = encrypted_string[i] - (padbuff[i] - 'A');
         if(c < 'A')
             c+=26;
         keybuff[i]= c;
@@ -119,7 +119,7 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
                 }
                 fprintf(stderr, "\n");
             } */
-            checkphrase(padbuff);
+            check_padbuff();
         } while(std::next_permutation(base.begin(), base.end()));
     }
 }

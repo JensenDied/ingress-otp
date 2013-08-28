@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string>
 #include <cstring>
-#include <set>
 
 #include <time.h>
 #include <map>
@@ -11,11 +10,9 @@
 #include "md5.h"
 #include "permutation_base.h"
 
-using std::advance;
 using std::iterator;
 using std::multimap;
 using std::pair;
-using std::set;
 using std::string;
 using std::vector;
 
@@ -65,7 +62,6 @@ char * get_key_for_encrypted_string_and_padbuff() {
     //C:WJYDJZ
     //K:EFWPWW
     //S:SECOND
-    //string rot;
     char c;
     for(unsigned int i = 0; i<encrypted_string_len; ++i) {
         c = encrypted_string_c[i] - (padbuff[i] - 'A');
@@ -82,11 +78,11 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
         ++skips;
         return;
     }
-    unsigned int i, j, k, l;
+    unsigned int i, j, k;
+    // There is probably a way to further optimize this so that it only needs to be done on the first invocation of a certain size.
     int base_s = words+1;
-    //if(budget > base_s)
-        //base_s = budget;
     vector<int> base(base_s);
+    const char * phrasebuff;
     for(vector<int> vv : get_permutation_base(budget)) {
         std::fill(base.begin(), base.end(),0);
         std::copy(vv.begin(), vv.begin() + std::min(vv.size(), base.size()) , base.begin());
@@ -96,7 +92,9 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
         }
         std::sort(base.begin(), base.end());
         do {
-            //++attempts;continue;
+            // Toggle this if you just want to get a count of how many interations need to be done for a keyspace
+            //++attempts; continue
+            //The last byte is 0 from initializeation, Xfill the padding so we can skip over it when adding words
             memset(padbuff, 'X', encrypted_string_len);
             k = 0;
             // i word counter / padarr pos
@@ -105,13 +103,13 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
             // j = misc
             for(i = 0; i < words; ++i) {
                 k += base[i];
-                l = phrase[i].length();
-                for(j = 0; j < l; ++j, ++k) {
-                    padbuff[k] = phrase[i][j];
+                phrasebuff = phrase[i].c_str();
+                for(j = 0; phrasebuff[j]; ++j, ++k) {
+                    padbuff[k] = phrasebuff[j];
                 }
             }
             k += base[words];
-            /* // This seems to have been resolved
+            /* // This seems to have been resolved after i stopped hand generating these
             if(k != encrypted_string_len) {
                 fprintf(stderr, "[ww] Possible buffer permutation issue, budget: %i, k: %i\n", budget, k);
                 for(unsigned int a = 0; a < base.size(); ++a) {
@@ -443,25 +441,17 @@ int main(int argc, char **argv) {
     memset(keybuff, 0, encrypted_string_len);
     padbuff = new char[encrypted_string_len+1];
     memset(padbuff, 'X', encrypted_string_len);
-    multimap<string,string> mm = mm_init();
+    //multimap<string,string> mm = mm_init();
     base_permutations = *pb_init();
     // These numbers will largely only be used 1-9 and 10,20,30,40,50. Added variation of fourty/forty as sixty
     num = vector <string>({ "ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN", "TWENTY", "TWENTYONE", "TWENTYTWO", "TWENTYTHREE", "TWENTYFOUR", "TWENTYFIVE", "TWENTYSIX", "TWENTYSEVEN", "TWENTYEIGHT", "TWENTYNINE", "THIRTY", "THIRTYONE", "THIRTYTWO", "THIRTYTHREE", "THIRTYFOUR", "THIRTYFIVE", "THIRTYSIX", "THIRTYSEVEN", "THIRTYEIGHT", "THIRTYNINE", "FORTY", "FORTYONE", "FORTYTWO", "FORTYTHREE", "FORTYFOUR", "FORTYFIVE", "FORTYSIX", "FORTYSEVEN", "FORTYEIGHT", "FORTYNINE", "FIFTY", "FIFTYONE", "FIFTYTWO", "FIFTYTHREE", "FIFTYFOUR", "FIFTYFIVE", "FIFTYSIX", "FIFTYSEVEN", "FIFTYEIGHT", "FIFTYNINE", "FOURTY", "FOURTYONE", "FOURTYTWO", "FOURTYTHREE", "FOURTYFOUR", "FOURTYFIVE", "FOURTYSIX", "FOURTYSEVEN", "FOURTYEIGHT", "FOURTYNINE" });
 
-    set<string> myset;
-    for(multimap<string, string>::iterator it = mm.begin(), end = mm.end(); it != end; it = mm.upper_bound(it->first)) {
-        myset.insert(it->first);
-    }
-
-    //set<string>::iterator mbegin = myset.begin(), mysetit;
-    //int setlen = myset.size();
     phraselen = 0;
     words = 0;
     phrase = new string[50];
     phrasestr = "";
     attempts = 0;
     skips=0;
-    string word, lword;
 
     printf("encrypted_string: %s(%i)format(%i)\n", encrypted_string_c, encrypted_string_len, n_format);
 
@@ -481,11 +471,8 @@ int main(int argc, char **argv) {
 }
 
 
+// This was going to be used for a markov chain approach before the regularity of niantic formats was apparent
 multimap <string, string> mm_init() {
-    // http://www.cplusplus.com/reference/map/multimap/equal_range/
-    // Plan: iterate through all keys, hashing final string.
-    //  padding: after every stage, all variants to str length
-    //  next(terms[], next, max)
     multimap <string, string> mm;
     for(string str : { "SECONDS", "MINUTES", "AND", "O", "IS" }) {
         mm.insert(pair<const string, string>("ONE", str));

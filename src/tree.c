@@ -1,4 +1,4 @@
-
+// This was going to be a sort of seed for a markov chain or some sort of permutation thing, it hasn't been up up to date and exists purely as refrence from early in the #cassandra anomaly
     std::string WORDLIST[] = {
         { "ONE",        { "SECONDS", "MINUTES", "AND", "O", "IS" }}
         { "TWO",        { "SECONDS", "MINUTES", "AND", "O", "IS" }}

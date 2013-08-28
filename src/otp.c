@@ -1,15 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <cstring>
-
 #include <time.h>
 #include <map>
 #include <vector>
 #include <algorithm>
+
 #include "md5.h"
 #include "permutation_base.h"
 
+// This code looks a lot worse than it is for a few reasons, although it's still not great.
+// i moved a lot of local variables to global for speed reasons
+// i didn't get around to making this a otp solver class where the globals are members
+// it's reasonably fast (single threaded) and supports arguments to shard the work
+//   it does not itself know how complex work is so the sharding is the responsibility of the user
+// TOODS:
+//  convert the associated sum_n.py to c++ and replace permutation_base.c
+//  convert global scope to a class / instance
+//  mpi support?
+//  more formats and variations
+//
 using std::iterator;
 using std::multimap;
 using std::pair;
@@ -35,7 +45,9 @@ static string phrasestr;
 static vector< vector <vector  <int> > > base_permutations;
 static int start_hour, end_hour, start_second, start_minute, end_second, end_minute, measurement;
 
-inline void check_padbuff() {
+//hashes and compares padbuff with our known OTP md5
+inline void check_padbuff()
+{
     if(++attempts %500000 == 0) {
         fprintf(stderr, "Hashes: %llu, Skips: %i, str: %s\n", attempts, skips, padbuff);
     }
@@ -48,8 +60,11 @@ inline void check_padbuff() {
     }
 }
 
-
-vector<vector<int>> get_permutation_base(int val) {
+// retrieves our permutations base
+// TODO: Dynamically generate on first request
+//  sort and save for next_permutation, (sum_n.py, or the vector.push_back returns in the opposite order)
+vector<vector<int>> get_permutation_base(int val)
+{
     int max = 32;
     if(val > max) {
         fprintf(stderr, "[WW] Requested permutation val(%i) not supported\n", val);
@@ -58,7 +73,9 @@ vector<vector<int>> get_permutation_base(int val) {
     return base_permutations[val];
 }
 
-char * get_key_for_encrypted_string_and_padbuff() {
+//Alpha Rot-N function
+char * get_key_for_encrypted_string_and_padbuff()
+{
     //C:WJYDJZ
     //K:EFWPWW
     //S:SECOND
@@ -72,7 +89,9 @@ char * get_key_for_encrypted_string_and_padbuff() {
     return keybuff;
 }
 
-void pad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen) {
+// iterates and permutes all padding combinations for the passed phrase, then checks
+void pad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen)
+{
     int budget = encrypted_string_len - plen; 
     if(budget < 0) {
         ++skips;
@@ -90,6 +109,7 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
             ++skips; // Skip permutations with more elements than words
             continue;
         }
+        //TODO: Remove when get_permutation_base() returns in the correct order
         std::sort(base.begin(), base.end());
         do {
             // Toggle this if you just want to get a count of how many interations need to be done for a keyspace
@@ -99,7 +119,6 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
             k = 0;
             // i word counter / padarr pos
             // k padbuff position
-            // l = phrase[i] length
             // j = misc
             for(i = 0; i < words; ++i) {
                 k += base[i];
@@ -123,7 +142,8 @@ void pad_check_phrase(const string phrase[], const unsigned int words, const uns
 }
 
 
-void format_1() { // 17.2B
+void format_1() // 17.2B
+{
 //%m MINUTES %s SECONDS PAST THE HOUR
 //%m MINUTES %s SECONDS AFTER THE HOUR
 //%m MINUTES AND %s SECONDS PAST THE HOUR
@@ -241,7 +261,8 @@ void format_1() { // 17.2B
     }
 }
 
-void format_2() {
+void format_2()
+{
 //&0  %h O CLOCK     %m MINUTES     %s SECONDS #Elide seconds at 0
 //&1  %h O CLOCK AND %m MINUTES     %s SECONDS
 //&2  %h O CLOCK     %m MINUTES AND %s SECONDS
@@ -356,7 +377,9 @@ void format_2() {
     }
 }
 
-int usage(int argc, char **argv) {
+// usage, simple enough
+int usage(int argc, char **argv)
+{
     fprintf(stderr, "Usage:\n\t%s encrypted_string md5\n"
         "\n\tThis program accepts the following optional arguments\n"
         "\t[-f format=0]\n"
@@ -368,7 +391,9 @@ int usage(int argc, char **argv) {
     return 1;
 }
 
-int main(int argc, char **argv) {
+// mostly data init and arg handling until it gets down to the switch on formats
+int main(int argc, char **argv)
+{
     if(argc < 3) {
         exit(usage(argc, argv));
     }
@@ -472,7 +497,8 @@ int main(int argc, char **argv) {
 
 
 // This was going to be used for a markov chain approach before the regularity of niantic formats was apparent
-multimap <string, string> mm_init() {
+multimap <string, string> mm_init()
+{
     multimap <string, string> mm;
     for(string str : { "SECONDS", "MINUTES", "AND", "O", "IS" }) {
         mm.insert(pair<const string, string>("ONE", str));

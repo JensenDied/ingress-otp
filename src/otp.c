@@ -377,10 +377,16 @@ void format_2()
     }
 }
 
+void format_3() {
+//Original:      THIRTEEN  SECONDS   PAST    SEVEN  O  CLOCK   SHARP
+//%h O %m AND %s SECONDS
+//MEASUREMENT %n  IS  AT  %h  O %m AND %s SECONDS
+}
+
 // usage, simple enough
 int usage(int argc, char **argv)
 {
-    fprintf(stderr, "Usage:\n\t%s encrypted_string md5\n"
+    fprintf(stderr, "Usage:\n\t%s encrypted_string md5 [options]\n"
         "\n\tThis program accepts the following optional arguments\n"
         "\t[-f format=0]\n"
         "\t[-sh start_hour=1] [-eh end_hour=start_hour]\n"
@@ -487,9 +493,13 @@ int main(int argc, char **argv)
         case 2:
             format_2();
             break;
+        case 3:
+            format_3();
+            break;
         default:
             format_1();
             format_2();
+            format_3();
     }
     fprintf(stderr, "[ii] Not found in %llu attempts with known formats\n", attempts);
     exit(1);

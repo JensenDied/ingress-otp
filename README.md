@@ -1,4 +1,4 @@
-Ingress One Time Pad Cracker
+Ingress One Time Pad Solver
 =========
 
 This was an effort to peform a partial known plaintext attack against the published timestamp information to determine when anomaly volaties were being measured

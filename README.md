@@ -37,6 +37,18 @@ Notes
 * Included is a partial list of known formats through the #Cassandra Anomaly Series
 * Some testcases are included, although mostly hasn't been updates to the newer format strings
 
+Proof of Work
+-----
+Chicago / Helios Measurement 4 Results
+
+* Results on FB: https://www.facebook.com/Ingress/photos/a.463739937007011.96998.463638860350452/581692171878453/?type=1
+* Posting of md5 of last timestamp: https://plus.google.com/+Ingress/posts/5dtPnGMEXb6
+
+```
+    $ echo -n "ONEMINUTEXFORTYSIXXSECONDSXPASTXTHEXHOURXXXXXXXXXXXXXXXXXXX"|md5sum
+    be29ab4f88de2a5490fe55886af29cbd  -
+```
+
 Included External Code
 ----
 - MD5 Library: converted to C++ class by Frank Thilo (thilo@unix-ag.org) for bzflag (http://www.bzflag.org) (c) 1991-2, RSA Data Security, Inc. Created 1991. Allrights reserved.

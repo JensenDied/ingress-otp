@@ -92,7 +92,7 @@ char * get_key_for_encrypted_string_and_padbuff()
 // iterates and permutes all padding combinations for the passed phrase, then checks
 void pad_check_phrase(const string phrase[], const unsigned int words, const unsigned int plen)
 {
-    int budget = encrypted_string_len - plen; 
+    int budget = encrypted_string_len - plen;
     if(budget < 0) {
         ++skips;
         return;
